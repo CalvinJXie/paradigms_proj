@@ -1,1 +1,3 @@
 03/09/2025 9:30 PM: Started creating github repo with all the project requirements. 
+03/09/2025 9:41 PM: Looking at the description, the project seems pretty simple. We have an expression, which will likely be held in a list to simulate a stack, and then if successful, we add the result to another list holding the history. My initial pseudocode that I am thinking is to loop through input and add to the stack, count number of isDigit and operators. If digit and operater are mismatched return an error, else run prefix calc and add value to history. Not sure about batch/interactive mode, will look at that stuff after main function is implemented.
+
