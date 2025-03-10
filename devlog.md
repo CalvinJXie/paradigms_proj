@@ -1,3 +1,7 @@
-03/09/2025 9:30 PM: Started creating github repo with all the project requirements. 
+03/09/2025 9:30 PM: Started creating github repo with all the project requirements.
+
 03/09/2025 9:41 PM: Looking at the description, the project seems pretty simple. We have an expression, which will likely be held in a list to simulate a stack, and then if successful, we add the result to another list holding the history. My initial pseudocode that I am thinking is to loop through input and add to the stack, count number of isDigit and operators. If digit and operater are mismatched return an error, else run prefix calc and add value to history. Not sure about batch/interactive mode, will look at that stuff after main function is implemented.
 
+03/09/2025 9:58 PM: I realized that I would have to parse digits out of a string, so I need to do something about that. I think I am able to compare it directly to an ascii, but not entirely sure. There may also be a function already that I can call, so I will need to do research on this. For the stack, I will need to create the pop and push functions, which I am thinking of using car/cdr/cons for.
+
+03/09/2025 10:07 PM: I just read the part in the project that says $n references array[n] value, so I will need to create a function that does this as well when I parse the string. I am thinking of creating an array[n] function that will use a provided index to find the value of that in the history. This project is looking harder and harder...
