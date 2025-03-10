@@ -12,6 +12,9 @@
 (define (toFloat n)
   (real->double-flonum n))
 
+; global def of stack
+(define stack '())
+
 ; stack operations
 (define (stack_push stackList value)
   (cons value stackList)) ; append value ot stackList- list implementation of a stack
@@ -26,8 +29,8 @@
   (case operation
     [("+") (values (+ n1 n2) #t)]
     [("-") (values (- n1 n2) #t)]
-    [("*") (vlaues (* n1 n2) #t)]
+    [("*") (values (* n1 n2) #t)]
     [("/") (if (zero? n2)
                (values #f "Dividing by zero")
                (values (quotient n1 n2) #t))]
-    [else (values #f (format "Unknown Operator: ~a" operator))]))
+    [else (values #f (format "Unknown Operator: ~a" operation))]))
