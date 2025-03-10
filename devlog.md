@@ -6,4 +6,8 @@
 
 03/09/2025 10:07 PM: I just read the part in the project that says $n references array[n] value, so I will need to create a function that does this as well when I parse the string. I am thinking of creating an array[n] function that will use a provided index to find the value of that in the history. This project is looking harder and harder...
 
-03/10/2025 4:42 PM: created prefix notation function that calculates based off of operator input + 2 number input. Thinking of using 2 stacks, digit_stack and operator_stack which will pop out the values and evaluate.
+03/10/2025 4:42 PM: created prefix notation function that calculates based off of operator input + 2 number input. Thinking of using 2 stacks, digit_stack and operator_stack which will pop out the values and evaluate. Found some errors in the function and fixed them, misspelled values and wrote operator instead of operation. Testing the function by writing (apply_operation "+" 3 4) and returned 7, #t. Seems like it works.
+
+03/10/2025 4:53 PM: Thinking of working on the parse string function now. This feels like it will be full of errors and very long......
+
+03/10/2025 4:59 PM: Just looked at some useful functions from the project description and realized I could just do string->list. Will pivot from here.
