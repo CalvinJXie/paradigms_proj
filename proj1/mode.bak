@@ -20,14 +20,3 @@
   (if (null? stack) ; check if empty list/stack
     (list #f '()) ; if true return empty list/stack, #f indicates error/false
     (list (car stack) (cdr stack)))); else return a list with top/first element and remaining stack
-
-; function to evaluate prefix expression
-(define (apply_operation operation n1 n2)
-  (case operation
-    [("+") (values (+ n1 n2) #t)]
-    [("-") (values (- n1 n2) #t)]
-    [("*") (vlaues (* n1 n2) #t)]
-    [("/") (if (zero? n2)
-               (values #f "Dividing by zero")
-               (values (quotient n1 n2) #t))]
-    [else (values #f (format "Unknown Operator: ~a" operator))]))
