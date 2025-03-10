@@ -11,3 +11,5 @@
 03/10/2025 4:53 PM: Thinking of working on the parse string function now. This feels like it will be full of errors and very long......
 
 03/10/2025 4:59 PM: Just looked at some useful functions from the project description and realized I could just do string->list. Will pivot from here.
+
+03/10/2025 6:23 PM: Finished a process_char function that reads an input character and determines if it should convert to an index history value or return true. Tested the function using (process_char "$1") with constants put into history list and outputs are correct. Now need to move onto main function and I think Project should be over. 
