@@ -32,8 +32,6 @@ Expressions
 An expression is a value, binary operation, or a unary operation.
 + – A binary operator that adds together the result of two expressions.
 * – A binary operator that multiplies together the result of two expressions.
-Programming Language Paradigms Page 1
-CS4337 Project 1 Spring 2025
 / – A binary operator that divides (integer division) the result of the first expression by the result
 of the second. Don’t forget that the user might try to divide by zero. This is an error.
 - – A unary operator that negates the value of an expression. There is no subtraction. To subtract
@@ -53,7 +51,7 @@ The first element would be the result of the evaluation, and the second the rema
 in the expression.
 • Solve the problem in stages. First think about how you would write this program in a language
 you are familiar with. Maybe write some psudocode. Translate the algorithm to use the
-functional way of computation. Then, write the Haskell code.
+functional way of computation.
 • Test your functions individually.
 
 Some useful functions
