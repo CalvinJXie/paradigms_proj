@@ -40,3 +40,26 @@ loop through char list while it is not empty
 I will start to implment this soon.
 
 03/10/2025 8:24 PM: The implementation still requires whitespace, but it seems like everything else is in place. All I need to do is fix this tokenize function to skip whitespace and do the necessary stuff.
+
+03/10/2025 8:34 PM: Ok, it seems like the description and examples are extremely convoluted... Are the inputs whitespaces? the example doesn't have it, but says it can. IDK anymore. There is also an example with backslashes??? This is not making any sense the more I read it. I will have to email professor about this. Also apprently this is in Haskell??? So much confusion.
+
+03/10/2025 9:52 PM: I debugged. Decided that this will be the final iteration. The inputs are a bit convoluted but assuming the \$1 \$2 stuff is irrelevant, every case seems to work. I also decided to not email the prof and just go with what it is. 
+Tested test cases:
+> -3 10
+1: -7.0
+History: (-7)
+
+> +$0 2
+2: -5.0
+History: (-7 -5)
+
+> +$0$1
+3: -12.0
+History: (-7 -5 -12)
+
+> + -3 10
+4: 7.0
+History: (-7 -5 -12 7)
+
+These are the test cases that seem to be correct.
+Some test cases that I am not too sure about, +12 => returns not enough operands, which makes sense since +12 is missing another number. I was not sure if this should have been evaluated as 1 + 2 based on the description in the proj. +$12 also returns not enough operands, which makes sense as 12 is not an available index.

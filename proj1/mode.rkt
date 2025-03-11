@@ -33,27 +33,41 @@
     [else (values #f (format "Error: Unknown Operator: ~a" operation))])) ;for anything else, return error msg
 
 (define (tokenize str)
-  (let loop ([chars (string->list str)] ;convert to list of chars
-             [current ""] ; keep track of current
-             [tokens '()]) ; accumulate tokens
+  (let loop ([chars (string->list str)]
+             [current ""]
+             [tokens '()]
+             [prev-char #f]) ; Track previous character to detect unary -
     (cond
-      [(null? chars) ; no chars remaining
-       (if (equal? current "") ; check if current token is empty
-           (reverse tokens) ; return reversed token list if empty
-           (reverse (cons current tokens)))] ; if not empty add final token and reverse 
-      [(char-whitespace? (car chars)) ; check if whitespace
-       (if (equal? current ""); check if curr empty
-           (loop (cdr chars) "" tokens); skip white space
-           (loop (cdr chars) "" (cons current tokens)))]; add current token to list
-      [(member (car chars) '(#\+ #\- #\* #\/)) ; if operator
-       (if (equal? current ""); check if curr empty
-           (loop (cdr chars) "" (cons (string (car chars)) tokens)); add operator as token
-           (loop (cdr chars) (string (car chars)) (cons current tokens)))]
-      [else ; if num or $n
-       (loop (cdr chars); go through remaining chars
-             (string-append current (string (car chars))); apend character to current
-             tokens)])))
-
+      [(null? chars) ; End of string
+       (if (equal? current "")
+           (reverse tokens)
+           (reverse (cons current tokens)))]
+      [(char-whitespace? (car chars)) ; Whitespace
+       (if (equal? current "")
+           (loop (cdr chars) "" tokens (car chars))
+           (loop (cdr chars) "" (cons current tokens) (car chars)))]
+      [(member (car chars) '(#\+ #\- #\* #\/)) ; Operator
+       (if (equal? current "")
+           (loop (cdr chars) "" (cons (string (car chars)) tokens) (car chars))
+           (loop (cdr chars) (string (car chars)) (cons current tokens) (car chars)))]
+      [(char=? (car chars) #\$) ; Start of $n reference
+       (if (equal? current "")
+           (loop (cdr chars) "$" tokens (car chars))
+           (loop (cdr chars) (string (car chars)) (cons current tokens) (car chars)))]
+      [else ; Number or part of $n
+       (let ([new-current (string-append current (string (car chars)))])
+         (if (and (> (string-length new-current) 1) ; Check if multi-character
+                  (not (string=? (substring new-current 0 1) "$"))) ; Not a $n
+             (let ([last-char (string-ref new-current (- (string-length new-current) 1))])
+               (if (and (member last-char '(#\+ #\- #\* #\/)) ; Last char is operator
+                        (not (and (char=? last-char #\-) ; Allow - as unary if prev is operator or start
+                                  (or (not prev-char) (member prev-char '(#\+ #\- #\* #\/ #\space))))))
+                   (loop (cdr chars) ; Move past current char
+                         (substring new-current (- (string-length new-current) 1)) ; Operator
+                         (cons (substring new-current 0 (- (string-length new-current) 1)) tokens)
+                         (car chars))
+                   (loop (cdr chars) new-current tokens (car chars))))
+             (loop (cdr chars) new-current tokens (car chars))))])))
 
 ;function to process single character
 (define (process_char character history)
@@ -76,29 +90,29 @@
                [current_stack '()]); start with empty stack each time
       (if (null? char_list) ; check if char_list is empty
           (if (null? current_stack) ; check if current_stack is empty
-                (values #f #f "Error: Empty expression" history stack) ; return error if empty
-                (let ([result (car current_stack)]) ; get potential result from stack top
-                  (if (null? (cdr current_stack)) ; check if exactly one item in stack
-                      (values result #t #f (cons result history) stack)
-                      (values #f #f "Error: Invalid expression" history stack))))
+              (values #f #f "Error: Empty expression" history stack) ; return error if empty
+              (let ([result (car current_stack)]) ; get potential result from stack top
+                (if (null? (cdr current_stack)) ; check if exactly one item in stack
+                    (values result #t #f (cons result history) stack)
+                    (values #f #f "Error: Invalid expression" history stack))))
           (let* ([char (car char_list)] ; get first character from char_list
-                 [processed (process_char char history)]; process the character
-                 [value (car  processed)]; extract values from processed result
-                 [is-number? (cadr processed)]); get boolean to see if it is number
+                 [processed (process_char char history)] ; process the character
+                 [value (car processed)] ; extract values from processed result
+                 [is-number? (cadr processed)]) ; get boolean to see if it is number
             (if is-number? ; check if is number from prev boolean
-                (loop (cdr char_list) (stack_push current_stack value)); if it is a number, loop through remaining characters and push values onto stack
+                (loop (cdr char_list) (stack_push current_stack value)) ; if it is a number, loop through remaining characters and push values onto stack
                 ; else pop 2 numbers and run the operation
                 (let* ([pop1 (stack_pop current_stack)] ; pop first number from current stack
                        [n1 (car pop1)] ; gets first num value
                        [rest1 (cadr pop1)]) ; get remaining stack
                   (if (not n1)
                       (values #f #f "Error: Not enough operands" history stack)
-                      (if (member char '("-")) ; unary check
+                      (if (and (member char '("-")) (not (null? (cdr char_list)))) ; Unary check with lookahead
                           (let-values ([(result success?) (apply_operation char n1 #f)])
                             (if success?
                                 (loop (cdr char_list) (stack_push rest1 result))
-                                (values result success? history stack)))
-                          (let* ([pop2 (stack_pop rest1)] ;
+                                (values #f #f result history stack)))
+                          (let* ([pop2 (stack_pop rest1)]
                                  [n2 (car pop2)]
                                  [rest2 (cadr pop2)])
                             (if (not n2)
@@ -106,8 +120,8 @@
                                 (let-values ([(result success?) (apply_operation char n1 n2)])
                                   (if success?
                                       (loop (cdr char_list) (stack_push rest2 result))
-                                      (values result success? history stack))))))))))))))
-                      
+                                      (values #f #f result history stack))))))))))))))
+
 (define (interactive_mode history stack)
   (displayln "Prefix Calculator: Enter a prefix expression (e.g., +*2$1+$2 1) or 'quit' to stop")
   (let loop ([h history]
@@ -134,6 +148,10 @@
         (displayln (toFloat result))
         (displayln err-msg))))
 
+; modify this, switch batch_mode and interactive, top one applies to executable. You can also change the name, interactive->batch
+; interactive_mode
+; batch_mode
 (if prompt?
-  (interactive_mode  '() '())
-  (batch_mode '() '()))
+    (interactive_mode '() '())
+    (batch_mode '() '())
+  )
