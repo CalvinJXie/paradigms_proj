@@ -12,10 +12,6 @@
 (define (toFloat n)
   (real->double-flonum n));converts input n to double precision
 
-; global def of stack
-(define stack '())
-(define history '()) ; history list
-
 ; stack operations
 (define (stack_push stackList value)
   (cons value stackList)) ; append value ot stackList- list implementation of a stack
@@ -36,6 +32,29 @@
                (values (quotient n1 n2) #t))] ;else do divide
     [else (values #f (format "Error: Unknown Operator: ~a" operation))])) ;for anything else, return error msg
 
+(define (tokenize str)
+  (let loop ([chars (string->list str)] ;convert to list of chars
+             [current ""] ; keep track of current
+             [tokens '()]) ; accumulate tokens
+    (cond
+      [(null? chars) ; no chars remaining
+       (if (equal? current "") ; check if current token is empty
+           (reverse tokens) ; return reversed token list if empty
+           (reverse (cons current tokens)))] ; if not empty add final token and reverse 
+      [(char-whitespace? (car chars)) ; check if whitespace
+       (if (equal? current ""); check if curr empty
+           (loop (cdr chars) "" tokens); skip white space
+           (loop (cdr chars) "" (cons current tokens)))]; add current token to list
+      [(member (car chars) '(#\+ #\- #\* #\/)) ; if operator
+       (if (equal? current ""); check if curr empty
+           (loop (cdr chars) "" (cons (string (car chars)) tokens)); add operator as token
+           (loop (cdr chars) (string (car chars)) (cons current tokens)))]
+      [else ; if num or $n
+       (loop (cdr chars); go through remaining chars
+             (string-append current (string (car chars))); apend character to current
+             tokens)])))
+
+
 ;function to process single character
 (define (process_char character history)
   (cond
@@ -51,19 +70,19 @@
     [else (list character #f)])); else return character with false
 
 ; function to evaluate prefix expression from string
-(define (compute_prefix str)
-  (let ([char_list (reverse (string-split str))]) ; split string into separate characters and reverses it for prefix order
-    (let loop ([char_list char_list] ;start looping
-               [current_stack stack]); initialize current_stack with global
+(define (compute_prefix str history stack)
+  (let ([char_list (reverse (tokenize str))]) ; split string into separate characters and reverses it for prefix order
+    (let loop ([char_list char_list] ;start looping with char_list as token list
+               [current_stack '()]); start with empty stack each time
       (if (null? char_list) ; check if char_list is empty
           (if (null? current_stack) ; check if current_stack is empty
-                (values #f "Error: Empty expression") ; return error if empty
-                (let ([result (car current_stack)])
-                  (if (null? (cdr current_stack))
-                      (values result #t (cons result history) current_stack)
-                      (values #f "Error: Invalid expression" history current_stack))))
+                (values #f #f "Error: Empty expression" history stack) ; return error if empty
+                (let ([result (car current_stack)]) ; get potential result from stack top
+                  (if (null? (cdr current_stack)) ; check if exactly one item in stack
+                      (values result #t #f (cons result history) stack)
+                      (values #f #f "Error: Invalid expression" history stack))))
           (let* ([char (car char_list)] ; get first character from char_list
-                 [processed (process_char char)]; process the character
+                 [processed (process_char char history)]; process the character
                  [value (car  processed)]; extract values from processed result
                  [is-number? (cadr processed)]); get boolean to see if it is number
             (if is-number? ; check if is number from prev boolean
@@ -73,7 +92,7 @@
                        [n1 (car pop1)] ; gets first num value
                        [rest1 (cadr pop1)]) ; get remaining stack
                   (if (not n1)
-                      (values #f "Error: Not enough operands" history stack)
+                      (values #f #f "Error: Not enough operands" history stack)
                       (if (member char '("-")) ; unary check
                           (let-values ([(result success?) (apply_operation char n1 #f)])
                             (if success?
@@ -83,31 +102,38 @@
                                  [n2 (car pop2)]
                                  [rest2 (cadr pop2)])
                             (if (not n2)
-                                (values #f "Error: Not enough operands" history stack)
+                                (values #f #f "Error: Not enough operands" history stack)
                                 (let-values ([(result success?) (apply_operation char n1 n2)])
                                   (if success?
                                       (loop (cdr char_list) (stack_push rest2 result))
                                       (values result success? history stack))))))))))))))
                       
-(define (interactive_mode)
-  (displayln "Prefix Calculator: Enter a prefix expression ( + 1 2) or 'quit' to stop")
-  (let loop()
+(define (interactive_mode history stack)
+  (displayln "Prefix Calculator: Enter a prefix expression (e.g., +*2$1+$2 1) or 'quit' to stop")
+  (let loop ([h history]
+             [s stack])
     (display "> ")
     (let ([input (read-line)])
-      (unless (string=? input "quit")
-        (let-values ([(result success?) (compute_prefix input)])
-          (if success?
-              (printf "~a: ~a\nHistory: ~a\n" (length history) result (reverse history))
-              (printf "Error: ~a\n" result)))
-        (loop))))
-  (displayln "exiting Calculator."))
+      (if (string=? input "quit")
+          (displayln "Fin.")
+          (let-values ([(result success? err-msg new-history new-stack) (compute_prefix input h s)])
+            (if success?
+                (begin
+                  (printf "~a: " (length new-history)) ; print id
+                  (display (toFloat result))
+                  (displayln "")
+                  (printf "History: ~a\n" (reverse new-history))
+                  (loop new-history s))
+                (begin
+                  (printf "~a\n" err-msg)
+                  (loop h s))))))))
 
-(define (batch_mode)
-  (let-values ([(result success?) (compute_prefix (read-line))])
+(define (batch_mode history stack)
+  (let-values ([(result success? err-msg new-history new-stack) (compute_prefix (read-line) history stack)])
     (if success?
         (displayln (toFloat result))
-        (displayln (string-append "Error: " result)))))
+        (displayln err-msg))))
 
 (if prompt?
-  (interactive_mode)
-  (batch_mode))
+  (interactive_mode  '() '())
+  (batch_mode '() '()))

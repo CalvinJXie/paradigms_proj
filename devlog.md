@@ -17,3 +17,26 @@
 03/10/2025 7:21 PM: created compute_prefix function that parses the string and then uses a stack to store digits, when an operator is encountered, it will pop off the last 2 digits inputted and compute the value. This result will then be appended to the history list. I will now go over requirements and make sure everything like edge cases work. 
 
 03/10/2025 7:27 PM: So, I think I need to completely change my code since apparently whitespaces are irrelevant... We can write the expression as +12, and a whitespace is used to determine the number like +1 12.... I think I will have to write my own function to parse strings as I initially thought. This is looking harder and harder....
+
+03/10/2025 7:31 PM: After a very very very quick online search :), it seems like I need to create a function called tokenize that will loop through the string and add the tokens to a token list. Pseudocode:
+convert input string to list of characters and hold it in a list
+initalize a list to stroke tokens
+initialize a variable to store current token
+loop through char list while it is not empty
+    get first element of char list
+    remove first element
+
+    if first element is white space
+        if current token is not empty
+            add to current token
+            reset current token
+    else if first element is an operator
+        if current is not empty
+            append current to tokens list
+        append first element to tokens list
+        reset current token
+    else
+        set current to current + first element
+I will start to implment this soon.
+
+03/10/2025 8:24 PM: The implementation still requires whitespace, but it seems like everything else is in place. All I need to do is fix this tokenize function to skip whitespace and do the necessary stuff.
