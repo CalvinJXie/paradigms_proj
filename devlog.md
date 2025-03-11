@@ -13,3 +13,7 @@
 03/10/2025 4:59 PM: Just looked at some useful functions from the project description and realized I could just do string->list. Will pivot from here.
 
 03/10/2025 6:23 PM: Finished a process_char function that reads an input character and determines if it should convert to an index history value or return true. Tested the function using (process_char "$1") with constants put into history list and outputs are correct. Now need to move onto main function and I think Project should be over. 
+
+03/10/2025 7:21 PM: created compute_prefix function that parses the string and then uses a stack to store digits, when an operator is encountered, it will pop off the last 2 digits inputted and compute the value. This result will then be appended to the history list. I will now go over requirements and make sure everything like edge cases work. 
+
+03/10/2025 7:27 PM: So, I think I need to completely change my code since apparently whitespaces are irrelevant... We can write the expression as +12, and a whitespace is used to determine the number like +1 12.... I think I will have to write my own function to parse strings as I initially thought. This is looking harder and harder....
