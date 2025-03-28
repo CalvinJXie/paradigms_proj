@@ -65,3 +65,5 @@ These are the test cases that seem to be correct.
 Some test cases that I am not too sure about, +12 => returns not enough operands, which makes sense since +12 is missing another number. I was not sure if this should have been evaluated as 1 + 2 based on the description in the proj. +$12 also returns not enough operands, which makes sense as 12 is not an available index.
 
 03/28/2025 2:47 PM: Double checking everything. My batch mode code was not correct, it should have same functions as interactive. Changing code to do that. Tested anothe rtest case, / 1 0. Where division by 0. Encountered an error. Fixing this as well.
+
+03/18/2025 3:06 PM: Submitted, then tested interactive to make sure everything was okay. Then realized that the code started adding #f to the history. Need to fix this now.

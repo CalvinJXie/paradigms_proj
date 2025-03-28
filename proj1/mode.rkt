@@ -1,3 +1,8 @@
+; Calvin Xie
+; cjx210000
+; Programming Language Paradigms
+
+
 #lang racket
 
 (define prompt?
@@ -8,9 +13,17 @@
        [(string=? (vector-ref args 0) "--batch") #f]
        [else #t])))
 
+
+
+
+
+
 ; toFloat function
 (define (toFloat n)
   (real->double-flonum n));converts input n to double precision
+
+
+
 
 ; stack operations
 (define (stack_push stackList value)
@@ -20,6 +33,8 @@
   (if (null? stackList) ; check if empty list/stack
     (list #f '()) ; if true return empty list/stack, #f indicates error/false
     (list (car stackList) (cdr stackList)))); else return a list with top/first element and remaining stack
+
+
 
 ; function to evaluate prefix expression
 (define (apply_operation operation n1 n2)
@@ -32,6 +47,8 @@
                (values (quotient n1 n2) #t))] ;else do divide
     [else (values #f (format "Error: Unknown Operator: ~a" operation))])) ;for anything else, return error msg
 
+
+; Tokenize Function. Gets out each character
 (define (tokenize str)
   (let loop ([chars (string->list str)]
              [current ""]
@@ -69,6 +86,11 @@
                    (loop (cdr chars) new-current tokens (car chars))))
              (loop (cdr chars) new-current tokens (car chars))))])))
 
+
+
+
+
+
 ;function to process single character
 (define (process_char character history)
   (cond
@@ -83,6 +105,9 @@
      (list (string->number character) #t)] ; if successfully converts number returns number with true
     [else (list character #f)])); else return character with false
 
+
+
+
 ; function to evaluate prefix expression from string
 (define (compute_prefix str history stack)
   (let ([char_list (reverse (tokenize str))]) ; split string into separate characters and reverses it for prefix order
@@ -93,7 +118,7 @@
               (values #f #f "Error: Empty expression" history stack) ; return error if empty
               (let ([result (car current_stack)]) ; get potential result from stack top
                 (if (null? (cdr current_stack)) ; check if exactly one item in stack
-                    (values result #t #f (cons result history) stack)
+                    (values result #t #f (if (number? result) (cons result history) history) stack)
                     (values #f #f "Error: Invalid expression" history stack))))
           (let* ([char (car char_list)] ; get first character from char_list
                  [processed (process_char char history)] ; process the character
@@ -122,6 +147,10 @@
                                       (loop (cdr char_list) (stack_push rest2 result))
                                       (values #f #f result history stack))))))))))))))
 
+
+
+
+; Interactive Function
 (define (interactive_mode history stack)
   (displayln "Prefix Calculator: Enter a prefix expression (e.g., +*2$1+$2 1) or 'quit' to stop")
   (let loop ([h history]
@@ -136,7 +165,7 @@
                   (printf "~a: " (length new-history)) ; print id
                   (if (number? result)
                       (display (toFloat result))
-                      (display "Error: Result is not a number"))
+                      (display "Error: Result is not a number or division by zero"))
                   (displayln "")
                   (printf "History: ~a\n" (reverse new-history))
                   (loop new-history s))
@@ -144,6 +173,10 @@
                   (printf "~a\n" err-msg)
                   (loop h s))))))))
 
+
+
+
+; Batch function
 (define (batch_mode history stack)
   (let loop ([h history]
              [s stack])
@@ -163,10 +196,25 @@
                (displayln err-msg))
            (loop (if success? new-history h) s))]))))
 
+
+
+
 ; modify this, switch batch_mode and interactive, top one applies to executable. You can also change the name, interactive->batch
-; interactive_mode
-; batch_mode
+
+; Runs in interactive.
+;(if prompt?
+;    (interactive_mode '() '())
+;    (batch_mode '() '())
+;  )
+
+; Runs in Batch.
+;(if prompt?
+;    (batch_mode '() '())
+;    (interactive_mode '() '())
+;    
+;  )
 (if prompt?
     (batch_mode '() '())
     (interactive_mode '() '())
+    
   )
