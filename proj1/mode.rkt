@@ -134,7 +134,9 @@
             (if success?
                 (begin
                   (printf "~a: " (length new-history)) ; print id
-                  (display (toFloat result))
+                  (if (number? result)
+                      (display (toFloat result))
+                      (display "Error: Result is not a number"))
                   (displayln "")
                   (printf "History: ~a\n" (reverse new-history))
                   (loop new-history s))
@@ -143,15 +145,28 @@
                   (loop h s))))))))
 
 (define (batch_mode history stack)
-  (let-values ([(result success? err-msg new-history new-stack) (compute_prefix (read-line) history stack)])
-    (if success?
-        (displayln (toFloat result))
-        (displayln err-msg))))
+  (let loop ([h history]
+             [s stack])
+    (let ([input (read-line)])
+      (cond
+        [(eof-object? input)
+         (void)] ; exit loop when end of input is reached
+        [(string=? input "quit")
+         (void)] ; exit loop when input is "quit"
+        [else
+         (let-values ([(result success? err-msg new-history new-stack) (compute_prefix input h s)])
+           (if success?
+               (begin
+                 (if (number? result)
+                     (displayln (toFloat result))
+                     (displayln "Error: Result is not a number or division by zero")))
+               (displayln err-msg))
+           (loop (if success? new-history h) s))]))))
 
 ; modify this, switch batch_mode and interactive, top one applies to executable. You can also change the name, interactive->batch
 ; interactive_mode
 ; batch_mode
 (if prompt?
-    (interactive_mode '() '())
     (batch_mode '() '())
+    (interactive_mode '() '())
   )
